@@ -428,7 +428,7 @@
     <!-- Diagram card -->
     <div class="card">
       <div class="card-header">
-        <span class="card-label">PM Room Trakcing Map</span>
+        <span class="card-label">PM Room Tracking Map</span>
         <span class="card-meta" id="img-meta">—</span>
       </div>
       <div class="img-wrap">
@@ -459,13 +459,19 @@
     const PASSWORD = 'teamdelta';
 
     /* ============================================================
-      STEP 3 — PRIVATE FILE ACCESS
-      Because Netlify is connected to your private GitHub, 
-      the files are "local" to the website. 
-      You don't need the full GitHub URL.
+      STEP 3 — GITHUB IMAGE URL
+      Both image.jpg and note.txt live in your public repo (e.g. q8x3tz).
+      Replace YOUR-USERNAME and YOUR-REPO with your real values.
+      Example: https://raw.githubusercontent.com/john123/q8x3tz/main/image.jpg
     ============================================================ */
-    const IMAGE_FILENAME = 'https://raw.githubusercontent.com/mmge2/j8x3tz/main/image.jpg';
-    const NOTE_FILENAME  = 'note.txt';
+    const IMAGE_URL = 'https://raw.githubusercontent.com/mmge2/j8x3tz/main/image.jpg';
+
+    /* ============================================================
+      STEP 4 — GITHUB NOTE URL
+      Same repo as above — just note.txt instead of image.jpg.
+      Example: https://raw.githubusercontent.com/john123/q8x3tz/main/note.txt
+    ============================================================ */
+    const NOTE_URL = 'https://raw.githubusercontent.com/mmge2/j8x3tz/main/note.txt';
 
     /* ============================================================
       STEP 5 — AUTO-REFRESH INTERVAL (4 hours)
@@ -534,7 +540,7 @@
 
       // Adding a timestamp (?t=...) forces the browser to bypass its cache 
       // and download the newest version you uploaded from your phone.
-      img.src = IMAGE_FILENAME + '?t=' + Date.now();
+      img.src = IMAGE_URL + '?t=' + Date.now();
     }
 
     function imgLoaded() {
@@ -555,7 +561,7 @@
       box.className = 'is-loading';
 
       // Fetch the note.txt from the same Netlify folder
-      fetch(NOTE_FILENAME + '?t=' + Date.now())
+      fetch(NOTE_URL + '?t=' + Date.now(), { cache: 'no-store' })
         .then(r => { if (!r.ok) throw new Error(); return r.text(); })
         .then(text => {
           box.className = '';
