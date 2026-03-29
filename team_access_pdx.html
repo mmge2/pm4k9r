@@ -382,18 +382,12 @@
     }
 
     .disclaimer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      padding: 6px 12px;
       font-size: 0.68rem;
       font-style: italic;
       color: var(--muted);
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      z-index: 999;
+      text-align: center;
+      padding-top: 0.5rem;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -464,6 +458,8 @@
         <span class="refresh-info" id="auto-countdown">Auto-refresh in —</span>
       </div>
     </div>
+
+    <p class="disclaimer">This is a personal hotel maintenance app. Not affiliated with Country Inn &amp; Suites.</p>
 
   </div>
 
@@ -628,8 +624,6 @@
       document.getElementById('auto-countdown').textContent = label;
     }
   </script>
-
-  <p class="disclaimer">This is a personal hotel maintenance app. Not affiliated with Country Inn &amp; Suites.</p>
 
 </body>
 </html>
