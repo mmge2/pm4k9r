@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Access</title>
+
+  <!-- ============================================================
+    STEP 1 — GOOGLE ANALYTICS
+    Replace G-XXXXXXXXXX with your real Measurement ID from
+    https://analytics.google.com → Admin → Data Streams
+  ============================================================ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f5f4f0;
+      --surface: #ffffff;
+      --border:  #d8d6cf;
+      --accent:  #1a4b8c;
+      --accent2: #2e7d52;
+      --warn:    #b85c1a;
+      --text:    #1c1c1c;
+      --muted:   #6b6b68;
+      --light:   #ebebE7;
+      --radius:  10px;
+      --font:    'IBM Plex Sans', sans-serif;
+      --mono:    'IBM Plex Mono', monospace;
+      --shadow:  0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── PASSWORD SCREEN ── */
+    #lock-screen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2.8rem 2.4rem 2.4rem;
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .lock-emblem {
+      width: 56px;
+      height: 56px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .lock-emblem svg {
+      width: 24px; height: 24px;
+      stroke: #fff; fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #lock-screen h1 {
+      font-size: 1.3rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .lock-tagline {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .divider { width: 100%; height: 1px; background: var(--border); }
+
+    .pwd-input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      text-align: center;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .pwd-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(26,75,140,0.1);
+    }
+
+    .pwd-input::placeholder {
+      letter-spacing: 0;
+      font-family: var(--font);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    #err-msg {
+      font-size: 0.8rem;
+      color: var(--warn);
+      display: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.72rem 1rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-family: var(--font);
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+    }
+
+    .btn-primary:hover { background: #153f78; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .lock-footer {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      font-family: var(--mono);
+    }
+
+    /* ── MAIN SCREEN ── */
+    #main-screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      max-width: 960px;
+      padding: 1.25rem 1rem 2rem;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .header-left { display: flex; flex-direction: column; gap: 4px; }
+
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+    }
+
+    .header-title { font-size: 1rem; font-weight: 500; }
+
+    .header-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      padding-left: 16px;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 8px; }
+
+    .btn-refresh {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-family: var(--font);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+    }
+
+    .btn-refresh:hover { background: #153f78; }
+    .btn-refresh:active { transform: scale(0.97); }
+    .btn-refresh:disabled { background: var(--muted); cursor: not-allowed; }
+
+    .btn-refresh svg {
+      width: 14px; height: 14px;
+      stroke: #fff; fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn-signout {
+      padding: 0.5rem 0.85rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.18s, color 0.18s;
+    }
+
+    .btn-signout:hover { border-color: var(--text); color: var(--text); }
+
+    /* Floor tabs — removed */
+    .floor-tabs {
+      display: none;
+      gap: 6px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .floor-tab {
+      padding: 0.4rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: var(--mono);
+    }
+
+    .floor-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .floor-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.72rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--light);
+    }
+
+    .card-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: var(--mono);
+    }
+
+    .card-meta { font-size: 0.72rem; color: var(--muted); font-family: var(--mono); }
+
+    /* Image */
+    .img-wrap {
+      width: 100%;
+      background: #e8e6e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+      position: relative;
+    }
+
+    #floor-img { width: 100%; display: block; object-fit: contain; }
+
+    .img-overlay {
+      position: absolute;
+      inset: 0;
+      background: #e8e6e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.6rem 1.1rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+    /* Notes */
+    #note-content {
+      padding: 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 80px;
+    }
+
+    #note-content.is-loading { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+
+    /* Auto-refresh bar */
+    .refresh-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.55rem 1.1rem;
+      border-top: 1px solid var(--border);
+      background: var(--light);
+    }
+
+    .bar-wrap { flex: 1; height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width 1s linear; }
+    .refresh-info { font-size: 0.7rem; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinning { animation: spin 0.8s linear infinite; }
+
+    @media (max-width: 520px) {
+      .btn-refresh span { display: none; }
+      .header-sub { padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PASSWORD SCREEN -->
+  <div id="lock-screen">
+    <div class="lock-emblem">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h1>Team Access</h1>
+    <p class="lock-tagline">PM Room Tracker<br/>Enter password to continue</p>
+    <div class="divider"></div>
+    <input class="pwd-input" type="password" id="pwd-input" placeholder="Enter password" autocomplete="current-password" />
+    <p id="err-msg">Incorrect password — please try again.</p>
+    <button class="btn-primary" onclick="checkPassword()">Access Floor Map</button>
+    <p class="lock-footer">Preventive Maintenance Tracking Map </br></br>  For internal use only</p>
+  </div>
+
+  <!-- MAIN SCREEN -->
+  <div id="main-screen">
+
+    <div class="header">
+      <div class="header-left">
+        <div class="header-title-row">
+          <div class="status-dot"></div>
+          <span class="header-title">Team Access — Country Inn & Suites (Delta Park North Portland)</span>
+        </div>
+        <div class="header-sub" id="last-refreshed">Last refreshed: —</div>
+      </div>
+      <div class="header-right">
+        <button class="btn-refresh" id="refresh-btn" onclick="manualRefresh()">
+          <svg id="refresh-icon" viewBox="0 0 24 24">
+            <path d="M23 4v6h-6"/>
+            <path d="M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          <span>Refresh now</span>
+        </button>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <!-- Diagram card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">PM Room Trakcing Map</span>
+        <span class="card-meta" id="img-meta">—</span>
+      </div>
+      <div class="img-wrap">
+        <div class="img-overlay" id="img-overlay">Loading diagram...</div>
+        <img id="floor-img" src="" alt="Floor diagram" onload="imgLoaded()" onerror="imgError()" style="display:none;" />
+      </div>
+    </div>
+
+    <!-- Notes card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Notes &amp; Updates</span>
+        <span class="card-meta" id="note-meta">—</span>
+      </div>
+      <div id="note-content" class="is-loading">Loading notes...</div>
+      <div class="refresh-status">
+        <div class="bar-wrap"><div class="bar-fill" id="auto-bar"></div></div>
+        <span class="refresh-info" id="auto-countdown">Auto-refresh in —</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ============================================================
+      STEP 2 — PASSWORD
+    ============================================================ */
+    const PASSWORD = 'teamdelta';
+
+    /* ============================================================
+      STEP 3 — PRIVATE FILE ACCESS
+      Because Netlify is connected to your private GitHub, 
+      the files are "local" to the website. 
+      You don't need the full GitHub URL.
+    ============================================================ */
+    const IMAGE_FILENAME = 'image.jpg';
+    const NOTE_FILENAME  = 'note.txt';
+
+    /* ============================================================
+      STEP 5 — AUTO-REFRESH INTERVAL (4 hours)
+    ============================================================ */
+    const AUTO_REFRESH_SECONDS = 14400; 
+
+    /* ───────────────────────────────────── */
+
+    let autoTimer;
+    let secondsLeft = AUTO_REFRESH_SECONDS;
+
+    // Handle Password Entry
+    document.getElementById('pwd-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    function checkPassword() {
+      const input = document.getElementById('pwd-input').value;
+      if (input === PASSWORD) {
+        sessionStorage.setItem('auth', '1');
+        openMain();
+      } else {
+        const err = document.getElementById('err-msg');
+        err.style.display = 'block';
+        document.getElementById('pwd-input').value = '';
+        setTimeout(() => { err.style.display = 'none'; }, 3000);
+      }
+    }
+
+    function signOut() {
+      sessionStorage.removeItem('auth');
+      clearInterval(autoTimer);
+      document.getElementById('main-screen').style.display = 'none';
+      document.getElementById('lock-screen').style.display = 'flex';
+      document.getElementById('pwd-input').value = '';
+    }
+
+    // Check if already logged in
+    if (sessionStorage.getItem('auth') === '1') {
+      // Small delay to ensure DOM is ready
+      setTimeout(openMain, 100);
+    }
+
+    function openMain() {
+      document.getElementById('lock-screen').style.display = 'none';
+      document.getElementById('main-screen').style.display = 'flex';
+      loadAll();
+      startAutoRefresh();
+    }
+
+    function loadAll() {
+      loadImage();
+      loadNote();
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('last-refreshed').textContent = 'Last refreshed: ' + now;
+    }
+
+    function loadImage() {
+      const img     = document.getElementById('floor-img');
+      const overlay = document.getElementById('img-overlay');
+      const meta    = document.getElementById('img-meta');
+      
+      img.style.display = 'none';
+      overlay.style.display = 'flex';
+      overlay.textContent = 'Loading diagram...';
+
+      // Adding a timestamp (?t=...) forces the browser to bypass its cache 
+      // and download the newest version you uploaded from your phone.
+      img.src = IMAGE_FILENAME + '?t=' + Date.now();
+    }
+
+    function imgLoaded() {
+      document.getElementById('floor-img').style.display = 'block';
+      document.getElementById('img-overlay').style.display = 'none';
+      document.getElementById('img-meta').textContent = 'Loaded ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function imgError() {
+      const overlay = document.getElementById('img-overlay');
+      overlay.style.display = 'flex';
+      overlay.textContent = 'Map not available at this time. Try again later.';
+    }
+
+    function loadNote() {
+      const box  = document.getElementById('note-content');
+      const meta = document.getElementById('note-meta');
+      box.className = 'is-loading';
+
+      // Fetch the note.txt from the same Netlify folder
+      fetch(NOTE_FILENAME + '?t=' + Date.now())
+        .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+        .then(text => {
+          box.className = '';
+          box.textContent = text.trim() || '(No notes yet)';
+          meta.textContent = 'Loaded ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        })
+        .catch(() => {
+          box.className = '';
+          box.textContent = 'Information not available at this time. Try again later.';
+        });
+    }
+
+    function manualRefresh() {
+      const btn  = document.getElementById('refresh-btn');
+      const icon = document.getElementById('refresh-icon');
+      btn.disabled = true;
+      icon.classList.add('spinning');
+      loadAll();
+      secondsLeft = AUTO_REFRESH_SECONDS;
+      setTimeout(() => { btn.disabled = false; icon.classList.remove('spinning'); }, 1500);
+    }
+
+    function startAutoRefresh() {
+      clearInterval(autoTimer);
+      secondsLeft = AUTO_REFRESH_SECONDS;
+      updateCountdown();
+      autoTimer = setInterval(() => {
+        secondsLeft--;
+        updateCountdown();
+        if (secondsLeft <= 0) {
+          loadAll();
+          secondsLeft = AUTO_REFRESH_SECONDS;
+        }
+      }, 1000);
+    }
+
+    function updateCountdown() {
+      const pct = ((AUTO_REFRESH_SECONDS - secondsLeft) / AUTO_REFRESH_SECONDS) * 100;
+      document.getElementById('auto-bar').style.width = pct + '%';
+      
+      const h = Math.floor(secondsLeft / 3600);
+      const m = Math.floor((secondsLeft % 3600) / 60);
+      const s = secondsLeft % 60;
+      
+      let label = 'Auto-refresh in ';
+      if (h > 0) label += h + 'h ';
+      if (m > 0 || h > 0) label += m + 'm ';
+      label += s + 's';
+      document.getElementById('auto-countdown').textContent = label;
+    }
+  </script>
